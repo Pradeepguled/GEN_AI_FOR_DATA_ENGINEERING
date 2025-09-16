@@ -1,0 +1,159 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc}
+
+\begin{document}
+
+\title{Generative AI for Data Engineering in Healthcare: A Framework for Intelligent Pipelines}
+
+\author{
+\IEEEauthorblockN{Pradeep Guled}
+\IEEEauthorblockA{
+Email: pradeep.guled@example.com}
+}
+
+\maketitle
+
+\begin{abstract}
+Healthcare generates massive amounts of heterogeneous data from electronic health records (EHRs), laboratory reports, medical imaging, prescriptions, and IoT devices. Managing this data presents significant challenges for data engineers, including schema mismatches, unstructured formats, data quality issues, and regulatory compliance. This paper explores how Generative AI (GenAI), particularly Large Language Models (LLMs), can augment data engineering workflows in healthcare. We propose a framework where GenAI assists in data ingestion, cleaning, transformation, validation, orchestration, and monitoring. Through case studies such as EHR structuring, clinical data summarization, and anomaly detection in IoT health data, we demonstrate how GenAI can reduce manual workload, improve pipeline efficiency, and enable faster analytics. We also highlight key challenges such as hallucinations, privacy risks, and cost, and propose future research directions towards domain-specific, trustworthy, and autonomous healthcare data pipelines.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Generative AI, Data Engineering, Healthcare, Large Language Models, Retrieval-Augmented Generation, Oracle Cloud Infrastructure, Data Pipelines
+\end{IEEEkeywords}
+
+\section{Introduction}
+Healthcare data is vast, complex, and fragmented. Patient records, doctor's notes, lab reports, imaging data, and wearable IoT devices generate streams of unstructured and structured information. For data engineers, transforming this raw data into standardized, high-quality datasets for analytics is a non-trivial challenge. Traditional approaches require significant manual coding of ETL (Extract, Transform, Load) pipelines, schema documentation, and error debugging, which increases cost and delays insights.
+
+Generative AI (GenAI), powered by Large Language Models (LLMs), has emerged as a promising assistant for data engineers. By automating SQL generation, code creation, data quality checks, schema explanation, orchestration, and monitoring, GenAI can serve as a co-pilot in healthcare data pipelines. Unlike conventional automation, GenAI is adaptable and context-aware, making it suitable for diverse and unstructured healthcare data.
+
+This paper makes three contributions:
+\begin{itemize}
+    \item Proposes a framework for integrating GenAI into healthcare data engineering pipelines.
+    \item Provides case studies (EHRs, lab reports, IoT health monitoring) that demonstrate practical applications.
+    \item Discusses challenges (hallucination, privacy, compliance) and outlines future research directions.
+\end{itemize}
+
+\section{Background and Related Work}
+\subsection{Large Language Models}
+LLMs such as GPT \cite{brown2020gpt3}, LLaMA \cite{touvron2023llama}, and MedPaLM \cite{singhal2023medpalm} have shown remarkable performance in understanding and generating human language. In healthcare, specialized LLMs like BioGPT \cite{luo2022biogpt} focus on biomedical literature.
+
+\subsection{Retrieval-Augmented Generation (RAG)}
+RAG reduces hallucination by combining model predictions with retrieval from trusted medical documents or knowledge bases \cite{lewis2020rag}.
+
+\subsection{Vector Databases}
+Vector databases (e.g., Oracle 23ai, Pinecone, FAISS) allow semantic search over embeddings, enabling contextual retrieval from healthcare data \cite{johnson2019billion}.
+
+\subsection{AI in Healthcare}
+Prior work focuses heavily on diagnosis and clinical decision support \cite{rajpurkar2022aihealthcare}. However, little attention has been given to using GenAI for data engineering tasks in healthcare.
+
+\section{Proposed Framework: GenAI for Healthcare Data Engineering}
+We propose a pipeline where GenAI assists across six stages:
+
+\subsection{Data Ingestion}
+GenAI generates connectors and code for integrating data from EHRs, IoT devices, and lab systems. This includes helping create robust parsers for CSV/JSON, generating OCR pipelines for scanned PDFs, and suggesting retry/backoff logic for flaky APIs.
+
+\subsection{Transformation and Cleaning}
+Doctor’s notes or lab reports are converted into structured records. Example:
+\begin{verbatim}
+Note: "Patient John Doe, 54, BP 140/90, prescribed Metformin."
+Structured: {Name: John Doe, Age: 54, BP: 140/90, Medication: Metformin}
+\end{verbatim}
+GenAI can propose normalization rules (e.g., metric conversions, canonical drug names), fill missing values by context-aware imputation, and generate tested ETL code for Spark/PySpark/Pandas.
+
+\subsection{Schema Understanding}
+GenAI documents medical schemas and explains columns, aiding engineers in working with undocumented systems. It can produce README-style documentation and field-level definitions, plus mapping suggestions between heterogeneous EHR schemas.
+
+\subsection{Data Validation}
+AI proposes quality rules such as:
+\begin{itemize}
+    \item Blood pressure values in mmHg.
+    \item Age between 0 and 120.
+    \item Prescription drug matches approved list.
+\end{itemize}
+It can auto-generate unit tests for validation rules and alerting thresholds for production monitoring.
+
+\subsection{Orchestration}
+Natural language can be translated into DAGs (Directed Acyclic Graphs) for tools like Apache Airflow. For example, a prompt like “Run nightly patient ingest, transform labs, load to warehouse at 01:30 UTC” can yield a production-ready DAG with retries, SLA checks, and notifications.
+
+\subsection{Monitoring and Anomaly Detection}
+GenAI summarizes logs and detects anomalies such as sudden spikes in ICU admissions. It can create human-readable incident descriptions for on-call engineers and propose probable root causes.
+
+\section{Illustrative Pipeline Diagram}
+\begin{figure*}[!t]
+    \centering
+    \begin{tikzpicture}[
+      node distance=12mm and 20mm,
+      box/.style = {rectangle, draw=black, rounded corners, minimum width=3.2cm, minimum height=7mm, align=center, fill=white},
+      arrow/.style = {-{Stealth[length=3mm,width=2mm]}, thick}
+    ]
+      % Nodes
+      \node[box] (sources) {Raw Healthcare Data\\(EHRs, Labs, Imaging, IoT)};
+      \node[box, right=of sources] (ingest) {GenAI Ingestion\\(Connectors, OCR, Parsers)};
+      \node[box, right=of ingest] (transform) {GenAI Transformation\\(Text→Structured, Normalization)};
+      \node[box, right=of transform] (validate) {GenAI Validation\\(Rules, Unit Tests)};
+      \node[box, right=of validate] (orch) {GenAI Orchestration\\(Airflow DAGs)};
+      \node[box, right=of orch] (monitor) {GenAI Monitoring\\(Anomaly Detection, Logs)};
+      \node[box, below=18mm of transform] (vector) {Vector DB (23ai)\\Embeddings & RAG};
+      \node[box, right=of monitor] (ware) {Clean, Secure Healthcare DB};
+      % Arrows
+      \draw[arrow] (sources) -- (ingest);
+      \draw[arrow] (ingest) -- (transform);
+      \draw[arrow] (transform) -- (validate);
+      \draw[arrow] (validate) -- (orch);
+      \draw[arrow] (orch) -- (monitor);
+      \draw[arrow] (monitor) -- (ware);
+      \draw[arrow] (transform) -- (vector);
+      \draw[arrow] (vector) -- ($(validate.south east)!0.6!(validate.north east)$) node[midway, right, font=\small] {RAG lookup};
+      % Feedback loops
+      \draw[arrow] ($(monitor.south west)+( -2mm, -1mm)$) .. controls +(-10mm,-12mm) and +(-15mm,8mm) .. (ingest.south) node[midway, below, font=\small] {Auto-remediation / retrain};
+      % Labels
+      \node[below=1mm of vector, font=\small] {Semantic search for context-aware transforms};
+    \end{tikzpicture}
+    \caption{GenAI-assisted healthcare data engineering pipeline. GenAI assists at ingestion, transformation, validation, orchestration, and monitoring; vector DB enables RAG and semantic search.}
+    \label{fig:pipeline}
+\end{figure*}
+
+\section{Case Studies}
+\subsection{Electronic Health Records (EHR)}
+Unstructured clinical notes are converted into structured records for analytics. GenAI aids by extracting patient attributes, mapping to FHIR/RIM standards, and suggesting schema mappings across hospital systems.
+
+\subsection{Lab Reports and Prescriptions}
+GenAI extracts key values from inconsistent PDFs and normalizes them into databases. This includes unit conversions (e.g., mg/dL to mmol/L), standardized lab test codes (LOINC), and drug normalization (RxNorm).
+
+\subsection{IoT Health Devices}
+Time-series data from wearables is cleaned and anomalies highlighted for early detection. GenAI can summarize patient trends, propose smoothing/imputation techniques, and suggest alerting thresholds.
+
+\section{Evaluation and Challenges}
+Benefits include reduced manual effort, faster pipeline development, and improved data quality. However, challenges remain:
+\begin{itemize}
+    \item Hallucinations: Incorrect SQL or transformation logic may introduce silent errors.
+    \item Privacy: Handling sensitive healthcare data under HIPAA/GDPR requires rigorous controls.
+    \item Trust: Clinicians require explainable outputs and provenance of transformations.
+    \item Cost: High compute expense of running LLMs at scale.
+\end{itemize}
+
+\section{Future Directions}
+\begin{itemize}
+    \item Domain-specific LLMs (e.g., MedPaLM, BioGPT) for healthcare pipelines.
+    \item Autonomous data pipelines that self-heal errors based on monitoring feedback.
+    \item Multi-agent systems with designated responsibilities (ingestion agent, validation agent, monitoring agent).
+    \item Explainable AI methods tailored for data transformations and schema changes.
+\end{itemize}
+
+\section{Conclusion}
+Generative AI has the potential to transform healthcare data engineering. By automating ingestion, transformation, validation, orchestration, and monitoring, GenAI can enable more efficient, accurate, and timely analytics. Future work must address privacy, compliance, and explainability to ensure trustworthy adoption in healthcare.
+
+\section*{Acknowledgment}
+This research paper was conceptualized and written by Pradeep Guled.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
